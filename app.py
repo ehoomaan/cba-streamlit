@@ -98,4 +98,4 @@ _last_updated_ts = os.path.getmtime(__file__)
 _last_updated = datetime.fromtimestamp(_last_updated_ts).strftime("%B %d, %Y")
 
 st.markdown("---")
-st.caption(f'Last updated on {_last_updated}.')
+st.caption(f'Last updated on {_last_updated}. Version 0.1')
