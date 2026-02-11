@@ -5,7 +5,7 @@ st.set_page_config(page_title="CBA Matrix Generator", layout="wide")
 st.title("TEG Choose-By-Advantage Matrix Formatter v1.0")
 
 purpose_choice = st.selectbox(
-    "Purpose of CBA",
+    "Purpose of Choose-By-Advantage Matrix",
     [
         "Deep Foundation System",
         "Support of Excavation Systems",
@@ -24,7 +24,7 @@ else:
 project_name = st.text_input("Project Name", value="")
 project_location = st.text_input("Project Location", value="")
 
-uploaded = st.file_uploader("Upload your XLSX template (row labels in column A)", type=["xlsx", "xlsm"])
+uploaded = st.file_uploader("Upload your XLSX file from Custom GPT", type=["xlsx", "xlsm"])
 
 disabled = (
     uploaded is None
