@@ -48,9 +48,9 @@ with st.form("cba_form", clear_on_submit=False):
     project_name = st.text_input("Project Name:", value="")
     project_location = st.text_input("Project Location:", value="")
     uploaded = st.file_uploader("Upload your XLSX file from Custom GPT", type=["xlsx", "xlsm"])
-    submitted = st.form_submit_button("Apply")
+    submitted = st.form_submit_button("Generate")
 
-# Only run generation when user clicks Apply
+# Only run generation when user clicks Generate
 if submitted:
     missing = []
     if not purpose:
@@ -97,7 +97,7 @@ if st.session_state.xlsx_bytes:
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
 else:
-    st.info("Fill in the fields, upload the file, then click Apply to generate the formatted Excel file.")
+    st.info("Fill in the fields, upload the file, then click Generate to generate the formatted Excel file.")
 
 # Footer
 _last_updated_ts = os.path.getmtime(__file__)
