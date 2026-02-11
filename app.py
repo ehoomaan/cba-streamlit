@@ -1,5 +1,7 @@
 import streamlit as st
 from cba_generator import generate_cba_from_uploaded_template
+import os
+from datetime import datetime
 
 st.set_page_config(page_title="CBA Matrix Generator", layout="centered")
 st.markdown(
@@ -89,5 +91,11 @@ if st.session_state.xlsx_bytes:
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
 else:
-    st.info("Upload a template and fill in the fields to generate the formatted Excel file.")
+    st.info("Upload the Excel file from CBA MATRIX PRO GPT and fill in the fields to generate the formatted Excel file.")
+    
+# Footer: last updated based on app.py file modified time
+_last_updated_ts = os.path.getmtime(__file__)
+_last_updated = datetime.fromtimestamp(_last_updated_ts).strftime("%B %d, %Y")
 
+st.markdown("---")
+st.caption(f'Last updated on {_last_updated}.')
