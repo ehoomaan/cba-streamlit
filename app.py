@@ -2,7 +2,26 @@ import streamlit as st
 from cba_generator import generate_cba_from_uploaded_template
 
 st.set_page_config(page_title="CBA Matrix Generator", layout="centered")
-st.title("TEG Choose-By-Advantage Matrix Formatter v0.1")
+#st.title("TEG Choose-By-Advantage Matrix Formatter v0.1")
+st.markdown(
+    """
+    <style>
+      .cba-title { font-size: 32px; color: #0B5394; margin: 0 0 0.25rem 0; }
+    </style>
+    <div class="cba-title">CBA Matrix Generator</div>
+    """,
+    unsafe_allow_html=True,
+)
+
+st.markdown(
+    """
+    <style>
+      .cba-title { font-size: 32px; color: #0B5394; margin: 0 0 0.25rem 0; }
+    </style>
+    <div class="cba-title">CBA Matrix Generator</div>
+    """,
+    unsafe_allow_html=True,
+)
 
 purpose_choice = st.selectbox(
     "Purpose of Choose-By-Advantage Matrix:",
