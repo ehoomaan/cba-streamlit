@@ -12,17 +12,6 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
-
-st.markdown(
-    """
-    <style>
-      .cba-title { font-size: 32px; color: #0B5394; margin: 0 0 0.25rem 0; }
-    </style>
-    <div class="cba-title">CBA Matrix Generator</div>
-    """,
-    unsafe_allow_html=True,
-)
-
 purpose_choice = st.selectbox(
     "Purpose of Choose-By-Advantage Matrix:",
     [
