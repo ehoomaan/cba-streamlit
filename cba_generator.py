@@ -1,22 +1,4 @@
 # cba_generator.py
-"""
-CBA workbook generator (Streamlit/Cloud friendly)
-
-How to use (from app.py):
-    from cba_generator import generate_cba_from_uploaded_template
-    xlsx_bytes, out_name = generate_cba_from_uploaded_template(
-        uploaded_xlsx_bytes=uploaded.read(),
-        purpose=purpose,
-        project_name=project_name,
-        project_location=project_location,
-        sheet_name=None,
-    )
-
-Notes:
-- This module contains NO Colab-specific code (no files.upload/download, no input()).
-- It does not write anything to disk; it returns the XLSX as bytes.
-"""
-
 from __future__ import annotations
 
 import io
@@ -639,7 +621,7 @@ def generate_cba_from_uploaded_template(
     ws_sum.row_dimensions[row_score].height = 22
     ws_sum.row_dimensions[row_summary].height = 160
 
-    # ---- Save to bytes (no disk) ----
+    # ---- Save to bytes----
     out_name = safe_name(f"TEG CBA Matrix-{purpose}-{project_name}-{date.today():%m%d%Y}") + ".xlsx"
     bio = BytesIO()
     wb.save(bio)
