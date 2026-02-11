@@ -8,7 +8,7 @@ st.markdown(
     <style>
       .cba-title { font-size: 32px; color: #0B5394; margin: 0 0 0.25rem 0; }
     </style>
-    <div class="cba-title">CBA Matrix Generator</div>
+    <div class="cba-title">TEG Choose-By-Advantage Matrix Formatter v0.1</div>
     """,
     unsafe_allow_html=True,
 )
