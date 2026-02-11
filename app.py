@@ -49,9 +49,9 @@ with st.form("cba_form", clear_on_submit=False):
     uploaded = st.file_uploader("Upload your XLSX file from Custom GPT", type=["xlsx", "xlsm"])
 
     # This is NOT "Generate Excel" and avoids regenerating while typing
-    submitted = st.form_submit_button("Apply")
+    submitted = st.form_submit_button("Generate")
 
-# Only run generation when user clicks Apply
+# Only run generation when user clicks Generate
 if submitted:
     missing = []
     if not purpose:
@@ -76,7 +76,7 @@ if submitted:
             uploaded.size,
         )
 
-        # Only regenerate if something truly changed since last Apply
+        # Only regenerate if something truly changed since last Generate
         if inputs_sig != st.session_state.last_inputs_sig:
             with st.spinner("Generating formatted workbook..."):
                 st.session_state.xlsx_bytes, st.session_state.out_name = generate_cba_from_uploaded_template(
@@ -99,7 +99,7 @@ if st.session_state.xlsx_bytes:
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
 else:
-    st.info("Fill in the fields, upload the file, then click Apply to generate the formatted Excel file.")
+    st.info("Fill in the fields, upload the file, then click Generate to generate the formatted Excel file.")
 
 # Footer
 _last_updated_ts = os.path.getmtime(__file__)
