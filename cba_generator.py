@@ -313,7 +313,7 @@ def generate_cba_from_uploaded_template(
 
     ws.column_dimensions["A"].width = 5
     for col in range(2, 2 + len(options) + 1):
-        ws.column_dimensions[get_column_letter(col)].width = 25
+        ws.column_dimensions[get_column_letter(col)].width = 35
 
     # DV + CF (upper rating cells)
     dv = DataValidation(
