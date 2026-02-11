@@ -1,8 +1,8 @@
 import streamlit as st
 from cba_generator import generate_cba_from_uploaded_template
 
-st.set_page_config(page_title="TEG Choose-By-Advantage Matrix Formatter v1.0", layout="wide")
-st.title("CBA Matrix Generator")
+st.set_page_config(page_title="CBA Matrix Generator", layout="wide")
+st.title("TEG Choose-By-Advantage Matrix Formatter v1.0")
 
 purpose_choice = st.selectbox(
     "Purpose of CBA",
