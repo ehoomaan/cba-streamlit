@@ -33,6 +33,22 @@ else:
 project_name = st.text_input("Project Name:", value="")
 project_location = st.text_input("Project Location:", value="")
 
+missing = []
+if not project_name.strip():
+    missing.append("Project Name")
+if not project_location.strip():
+    missing.append("Project Location")
+if not purpose.strip():
+    missing.append("Purpose")
+if uploaded is None:
+    missing.append("Template XLSX")
+
+ready = (len(missing) == 0)
+
+if missing:
+    st.error("Please fill in: " + ", ".join(missing))
+    
+
 uploaded = st.file_uploader("Upload your XLSX file from Custom GPT", type=["xlsx", "xlsm"])
 
 disabled = (
@@ -61,7 +77,7 @@ if "last_inputs_sig" not in st.session_state:
 
 # Create a signature so we only regenerate when inputs change
 inputs_sig = None
-if ready:
+if ready and inputs_sig != st.session_state.last_inputs_sig:
     inputs_sig = (
         purpose.strip(),
         project_name.strip(),
