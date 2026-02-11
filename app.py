@@ -24,34 +24,33 @@ if "out_name" not in st.session_state:
 if "last_inputs_sig" not in st.session_state:
     st.session_state.last_inputs_sig = None
 
-# --- Form (prevents rerun on each keystroke) ---
+# --- Purpose OUTSIDE form so "Other" input appears immediately ---
+purpose_choice = st.selectbox(
+    "Purpose of Choose-By-Advantage Matrix:",
+    [
+        "Deep Foundation System",
+        "Support of Excavation Systems",
+        "Underpinning",
+        "Ground Improvement",
+        "Other",
+    ],
+    key="purpose_choice",
+)
+
+if purpose_choice == "Other":
+    purpose_other = st.text_input("Enter purpose:", value="", key="purpose_other")
+    purpose = purpose_other.strip()
+else:
+    purpose = purpose_choice.strip()
+
+# --- Form for the rest (prevents rerun while typing) ---
 with st.form("cba_form", clear_on_submit=False):
-    purpose_choice = st.selectbox(
-        "Purpose of Choose-By-Advantage Matrix:",
-        [
-            "Deep Foundation System",
-            "Support of Excavation Systems",
-            "Underpinning",
-            "Ground Improvement",
-            "Other",
-        ],
-    )
-
-    if purpose_choice == "Other":
-        purpose_other = st.text_input("Enter purpose:", value="")
-        purpose = purpose_other.strip()
-    else:
-        purpose = purpose_choice.strip()
-
     project_name = st.text_input("Project Name:", value="")
     project_location = st.text_input("Project Location:", value="")
-
     uploaded = st.file_uploader("Upload your XLSX file from Custom GPT", type=["xlsx", "xlsm"])
+    submitted = st.form_submit_button("Apply")
 
-    # This is NOT "Generate Excel" and avoids regenerating while typing
-    submitted = st.form_submit_button("Generate")
-
-# Only run generation when user clicks Generate
+# Only run generation when user clicks Apply
 if submitted:
     missing = []
     if not purpose:
@@ -76,7 +75,6 @@ if submitted:
             uploaded.size,
         )
 
-        # Only regenerate if something truly changed since last Generate
         if inputs_sig != st.session_state.last_inputs_sig:
             with st.spinner("Generating formatted workbook..."):
                 st.session_state.xlsx_bytes, st.session_state.out_name = generate_cba_from_uploaded_template(
@@ -99,7 +97,7 @@ if st.session_state.xlsx_bytes:
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
 else:
-    st.info("Fill in the fields, upload the file, then click Generate to generate the formatted Excel file.")
+    st.info("Fill in the fields, upload the file, then click Apply to generate the formatted Excel file.")
 
 # Footer
 _last_updated_ts = os.path.getmtime(__file__)
