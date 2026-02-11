@@ -2,10 +2,10 @@ import streamlit as st
 from cba_generator import generate_cba_from_uploaded_template
 
 st.set_page_config(page_title="CBA Matrix Generator", layout="wide")
-st.title("TEG Choose-By-Advantage Matrix Formatter v1.0")
+st.title("TEG Choose-By-Advantage Matrix Formatter v0.1")
 
 purpose_choice = st.selectbox(
-    "Purpose of Choose-By-Advantage Matrix",
+    "Purpose of Choose-By-Advantage Matrix:",
     [
         "Deep Foundation System",
         "Support of Excavation Systems",
@@ -16,13 +16,13 @@ purpose_choice = st.selectbox(
 )
 
 if purpose_choice == "Other":
-    purpose_other = st.text_input("Enter purpose", value="")
+    purpose_other = st.text_input("Enter purpose:", value="")
     purpose = purpose_other.strip()
 else:
     purpose = purpose_choice.strip()
 
-project_name = st.text_input("Project Name", value="")
-project_location = st.text_input("Project Location", value="")
+project_name = st.text_input("Project Name:", value="")
+project_location = st.text_input("Project Location:", value="")
 
 uploaded = st.file_uploader("Upload your XLSX file from Custom GPT", type=["xlsx", "xlsm"])
 
