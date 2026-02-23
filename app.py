@@ -101,4 +101,4 @@ else:
 
 # Footer
 st.markdown("---")
-st.caption(f"Last updated on {"Febreray 4, 2026 }. Version 0.1")
+st.caption(f"Last updated on Febreray 4, 2026. Version 0.1")
