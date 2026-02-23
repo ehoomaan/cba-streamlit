@@ -100,7 +100,5 @@ else:
     st.info("Fill in the fields, upload the file, then click Generate to generate the formatted Excel file.")
 
 # Footer
-_last_updated_ts = os.path.getmtime(__file__)
-_last_updated = datetime.fromtimestamp(_last_updated_ts).strftime("%B %d, %Y")
 st.markdown("---")
-st.caption(f"Last updated on {_last_updated}. Version 0.1")
+st.caption(f"Last updated on {"Febreray 4, 2026 }. Version 0.1")
