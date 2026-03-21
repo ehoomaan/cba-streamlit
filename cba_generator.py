@@ -1,4 +1,3 @@
-# cba_generator.py
 from __future__ import annotations
 
 import io
@@ -27,7 +26,6 @@ def generate_cba_from_uploaded_template(
     project_location: str,
     sheet_name: Optional[str] = None,
 ) -> Tuple[bytes, str]:
-    # ---------- CONFIG ----------
     TITLE = f"Choose-by-Advantage Matrix for the {purpose}"
     SECTION_BAND_FILL = "f5f5f5"
     ROWLABEL_FILL = "f0f0f0"
@@ -64,9 +62,8 @@ def generate_cba_from_uploaded_template(
         "market familiarity",
     }
 
-    NO_BULLET_ROWS = {"feasibility"}  # keep feasibility plain
+    NO_BULLET_ROWS = {"feasibility"}
 
-    # ---------- helpers ----------
     def bulletize(text):
         if text is None:
             return ""
@@ -105,7 +102,6 @@ def generate_cba_from_uploaded_template(
                 rating_word = ""
         return rating_word, (m.group(2) or "")
 
-    # ---------- read Excel template ----------
     xls = pd.ExcelFile(io.BytesIO(uploaded_xlsx_bytes), engine="openpyxl")
     sheet_to_use = xls.sheet_names[0] if sheet_name is None else sheet_name
     df0 = pd.read_excel(xls, sheet_name=sheet_to_use, engine="openpyxl")
@@ -116,7 +112,6 @@ def generate_cba_from_uploaded_template(
     labels = [str(x) for x in df0.iloc[:, 0].tolist()]
     lower = [x.strip().lower() for x in labels]
 
-    # Ensure there is an Illustration row
     if "illustration" not in lower:
         df0 = pd.concat(
             [pd.DataFrame([["Illustration"] + [""] * len(options)], columns=df0.columns), df0],
@@ -125,9 +120,6 @@ def generate_cba_from_uploaded_template(
         labels = [str(x) for x in df0.iloc[:, 0].tolist()]
         lower = [x.strip().lower() for x in labels]
 
-    # =========================
-    #   Matrix sheet
-    # =========================
     wb = Workbook()
     ws = wb.active
     ws.title = "Matrix"
@@ -144,7 +136,6 @@ def generate_cba_from_uploaded_template(
 
     ncols = 2 + len(options)
 
-    # Banner
     ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=ncols)
     t = ws.cell(row=1, column=1, value=TITLE)
     t.font = Font(bold=True, size=TITLE_SIZE)
@@ -168,7 +159,6 @@ def generate_cba_from_uploaded_template(
     cR.font = Font(bold=True, size=14)
     cR.alignment = Alignment(horizontal="right", vertical="center")
 
-    # Header row
     hr = 4
 
     def style_hdr(r, c, text=None):
@@ -184,7 +174,6 @@ def generate_cba_from_uploaded_template(
     for idx, name in enumerate(options, start=1):
         style_hdr(hr, 2 + idx, f"Option {idx} - {name}")
 
-    # Section grouping
     desc_idx, consid_idx, other_idx = [], [], []
     for i, lab in enumerate(lower):
         if lab in DESC_ROWS:
@@ -265,7 +254,6 @@ def generate_cba_from_uploaded_template(
 
     table_end_row = r - 1
 
-    # Borders: thick frame, medium vertical between options, thick horizontal under Disadvantages
     disadv_row_top = None
     try:
         disadv_idx = next((i for i, lab in enumerate(lower) if lab.strip().lower() == "disadvantages"))
@@ -286,7 +274,7 @@ def generate_cba_from_uploaded_template(
             bottom_b = THICK if rr == table_end_row else THIN
 
             if cc >= 3 and cc < (2 + len(options)):
-                left_b = MEDIUM  # option dividers
+                left_b = MEDIUM
 
             if disadv_row_top and rr == disadv_row_top + 1:
                 top_b = THICK
@@ -297,7 +285,6 @@ def generate_cba_from_uploaded_template(
     for col in range(2, 2 + len(options) + 1):
         ws.column_dimensions[get_column_letter(col)].width = 35
 
-    # DV + CF (upper rating cells)
     dv = DataValidation(
         type="list",
         formula1='"' + ",".join(RATING_WORDS) + '"',
@@ -318,16 +305,12 @@ def generate_cba_from_uploaded_template(
                 rule = Rule(type="cellIs", operator="equal", formula=[f'"{word}"'], dxf=dxf)
                 ws.conditional_formatting.add(addr, rule)
 
-    # Freeze & print
     ws.freeze_panes = "C5"
     ws.page_setup.orientation = "landscape"
     ws.page_setup.fitToWidth = 1
     ws.page_setup.fitToHeight = 0
     ws.print_title_rows = "4:4"
 
-    # =========================
-    #   Weights & SAW
-    # =========================
     wsw = wb.create_sheet("Weights & SAW")
 
     opt_headers = [f"NormScore - {opt}" for opt in options]
@@ -339,8 +322,12 @@ def generate_cba_from_uploaded_template(
         h.font = Font(bold=True)
         h.alignment = CENTER
 
-    # Rating map at L/M
-    map_col = 12  # L/M
+    first_norm_col = 5
+    last_norm_col = 4 + len(options)
+
+    # FIX: place rating map dynamically to the right of the option columns
+    map_col = last_norm_col + 2
+
     wsw.cell(row=1, column=map_col, value="Rating").font = Font(bold=True)
     wsw.cell(row=1, column=map_col + 1, value="Raw").font = Font(bold=True)
     for r0, (name, val) in enumerate(
@@ -369,7 +356,6 @@ def generate_cba_from_uploaded_template(
         wsw.cell(row=i, column=3, value=default_importance)
         dv_import.add(f"C{i}")
 
-        # Weight normalization a_i / sum(a_i) (active only)
         wsw.cell(
             row=i,
             column=4,
@@ -379,10 +365,9 @@ def generate_cba_from_uploaded_template(
             ),
         )
 
-        # NormScores: INDEX/MATCH, clamped
         for j in range(1, len(options) + 1):
-            col_idx = 4 + j  # E...
-            addr_rating = upper_cells_by_col[j][i - 2]  # rating cell address in Matrix sheet
+            col_idx = 4 + j
+            addr_rating = upper_cells_by_col[j][i - 2]
             mapR = get_column_letter(map_col)
             mapV = get_column_letter(map_col + 1)
             formula = (
@@ -391,12 +376,8 @@ def generate_cba_from_uploaded_template(
             )
             wsw.cell(row=i, column=col_idx, value=formula)
 
-    # SAW / Rank / Score(0–10) / SumW
     total_row = 2 + n_attr
     wsw.cell(row=total_row, column=1, value="SAW Score")
-
-    first_norm_col = 5
-    last_norm_col = 4 + len(options)
 
     for j in range(1, len(options) + 1):
         col_idx = 4 + j
@@ -420,13 +401,12 @@ def generate_cba_from_uploaded_template(
     wsw.cell(row=sumw_row, column=1, value="Sum of normalized weights")
     wsw.cell(row=sumw_row, column=2, value=f"=SUM({w_rng})")
 
-    # formats + alignment
     for rr in range(2, 2 + n_attr):
         wsw.cell(row=rr, column=4).number_format = "0.00"
     for j in range(first_norm_col, last_norm_col + 1):
         wsw.cell(row=total_row, column=j).number_format = "0.00"
 
-    max_col = last_norm_col
+    max_col = max(last_norm_col, map_col + 1)
     max_row = sumw_row
     for rr in range(1, max_row + 1):
         for cc in range(1, max_col + 1):
@@ -439,7 +419,6 @@ def generate_cba_from_uploaded_template(
     wsw.column_dimensions[get_column_letter(map_col + 1)].width = 9
     wsw.freeze_panes = "A2"
 
-    # Header live color based on SAW*10 (Matrix headers)
     bands = [
         (0, 2, "FFC000"),
         (2, 4, "FFFF66"),
@@ -450,30 +429,25 @@ def generate_cba_from_uploaded_template(
     for j in range(1, len(options) + 1):
         hdr_col = 2 + j
         hdr_cell = f"{get_column_letter(hdr_col)}{hr}"
-        saw_cell = f"'Weights & SAW'!{get_column_letter(4 + j)}${total_row}"  # SAW (0..1)
+        saw_cell = f"'Weights & SAW'!{get_column_letter(4 + j)}${total_row}"
         for lo, hi, hexcol in bands:
             expr = f"=AND(10*{saw_cell}>={lo},10*{saw_cell}<{hi})"
             dxf = DifferentialStyle(fill=PatternFill(fill_type="solid", start_color=hexcol, end_color=hexcol))
             rule = Rule(type="expression", dxf=dxf, formula=[expr])
             ws.conditional_formatting.add(hdr_cell, rule)
 
-    # =========================
-    #   Summary CBA sheet
-    # =========================
     ws_sum = wb.create_sheet("Summary CBA")
 
     CENTER_SUM = Alignment(horizontal="center", vertical="center", wrap_text=True)
     LEFT_SUM = Alignment(horizontal="left", vertical="top", wrap_text=True)
 
-    ncols_sum = 1 + len(options)  # A = labels, B.. = options
+    ncols_sum = 1 + len(options)
 
-    # Title row (row 1)
     ws_sum.merge_cells(start_row=1, start_column=1, end_row=1, end_column=ncols_sum)
     t2 = ws_sum.cell(row=1, column=1, value=TITLE)
     t2.font = Font(bold=True, size=TITLE_SIZE)
     t2.alignment = Alignment(horizontal="center", vertical="center")
 
-    # Compute Summary header merge geometry from Summary width
     left_end_s = max(2, int(ncols_sum * 0.25))
     right_start_s = max(left_end_s + 1, ncols_sum - max(2, int(ncols_sum * 0.25)) + 1)
     mid_start_s = left_end_s + 1
@@ -491,10 +465,8 @@ def generate_cba_from_uploaded_template(
     c_rt.font = Font(bold=True, size=14)
     c_rt.alignment = Alignment(horizontal="right", vertical="center")
 
-    # Leave row 3 as spacer
     row_ill, row_opt, row_desc, row_score, row_summary = 4, 5, 6, 7, 8
 
-    # Labels in column A
     labels_summary = ["Illustration", "Option", "Description", "Score", "Summary"]
     for rr, lab in zip([row_ill, row_opt, row_desc, row_score, row_summary], labels_summary):
         cell = ws_sum.cell(row=rr, column=1, value=lab)
@@ -509,7 +481,6 @@ def generate_cba_from_uploaded_template(
                 return rr
         return None
 
-    # Illustration (text reference only; images cannot be referenced by formula)
     matrix_row_ill = find_matrix_row("illustration")
     if matrix_row_ill:
         for j in range(1, len(options) + 1):
@@ -519,13 +490,11 @@ def generate_cba_from_uploaded_template(
                 value=f"='Matrix'!{get_column_letter(2 + j)}{matrix_row_ill}",
             ).alignment = CENTER_SUM
 
-    # Option headers
     for j in range(1, len(options) + 1):
         c = ws_sum.cell(row=row_opt, column=1 + j, value=f"='Matrix'!{get_column_letter(2 + j)}{hr}")
         c.font = Font(bold=True)
         c.alignment = CENTER_SUM
 
-    # Apply same SAW-score color bands to Summary option row
     for j in range(1, len(options) + 1):
         hdr_cell = f"{get_column_letter(1 + j)}{row_opt}"
         saw_cell = f"'Weights & SAW'!{get_column_letter(4 + j)}{total_row}"
@@ -535,7 +504,6 @@ def generate_cba_from_uploaded_template(
             rule = Rule(type="expression", dxf=dxf, formula=[expr])
             ws_sum.conditional_formatting.add(hdr_cell, rule)
 
-    # Description row: prefer Scheme; else Description
     use_label = "scheme" if "scheme" in lower else ("description" if "description" in lower else None)
     matrix_row_desc = find_matrix_row(use_label) if use_label else None
     if matrix_row_desc:
@@ -546,16 +514,14 @@ def generate_cba_from_uploaded_template(
                 value=f"='Matrix'!{get_column_letter(2 + j)}{matrix_row_desc}",
             ).alignment = LEFT_SUM
 
-    # Score row: SAW Score from Weights & SAW (total_row), displayed as %
     for j in range(1, len(options) + 1):
-        colW = 4 + j  # E.. for SAW per option (same columns as NormScore headers)
+        colW = 4 + j
         colS = 1 + j
         formula = f"='Weights & SAW'!{get_column_letter(colW)}{total_row}"
         c = ws_sum.cell(row=row_score, column=colS, value=formula)
-        c.number_format = "0%"  # show as 0–100%
+        c.number_format = "0%"
         c.alignment = CENTER_SUM
 
-    # Conditional formatting on Score row (same bands/colors as elsewhere)
     bands_pct = [
         (0, 0.20, "FFC000"),
         (0.20, 0.40, "FFFF66"),
@@ -570,7 +536,6 @@ def generate_cba_from_uploaded_template(
             dxf = DifferentialStyle(fill=PatternFill(fill_type="solid", start_color=hexcol, end_color=hexcol))
             ws_sum.conditional_formatting.add(addr, Rule(type="expression", dxf=dxf, formula=[expr]))
 
-    # Summary row: Pros/Cons pulled from Matrix Advantages/Disadvantages
     adv_row = find_matrix_row("advantages")
     dis_row = find_matrix_row("disadvantages")
 
@@ -594,7 +559,6 @@ def generate_cba_from_uploaded_template(
 
         ws_sum.cell(row=row_summary, column=1 + j, value=formula).alignment = LEFT_SUM
 
-    # Borders & widths
     last_col_sum = 1 + len(options)
     for rr in range(row_ill, row_summary + 1):
         for cc in range(1, last_col_sum + 1):
@@ -611,17 +575,15 @@ def generate_cba_from_uploaded_template(
         ws_sum.column_dimensions[get_column_letter(col)].width = 35
     ws_sum.freeze_panes = "B4"
 
-    # Summary CBA fixed row heights
-    ws_sum.row_dimensions[1].height = 28   # Title
-    ws_sum.row_dimensions[2].height = 22   # Project info
-    ws_sum.row_dimensions[3].height = 10   # Spacer
+    ws_sum.row_dimensions[1].height = 28
+    ws_sum.row_dimensions[2].height = 22
+    ws_sum.row_dimensions[3].height = 10
     ws_sum.row_dimensions[row_ill].height = 60
     ws_sum.row_dimensions[row_opt].height = 22
     ws_sum.row_dimensions[row_desc].height = 90
     ws_sum.row_dimensions[row_score].height = 22
     ws_sum.row_dimensions[row_summary].height = 160
 
-    # ---- Save to bytes----
     out_name = safe_name(f"TEG CBA Matrix-{purpose}-{project_name}-{date.today():%m%d%Y}") + ".xlsx"
     bio = BytesIO()
     wb.save(bio)
