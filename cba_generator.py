@@ -221,7 +221,11 @@ def generate_cba_from_uploaded_template(
                     ws.cell(row=upper_r, column=excel_col, value=rating_word).alignment = CENTER
                     upper_cells_by_col[j].append(f"{get_column_letter(excel_col)}{upper_r}")
 
-                    ws.cell(row=lower_r, column=excel_col, value=bulletize(desc)).alignment = LEFT
+                    if label.strip().lower() in BULLET_ROWS:
+                        desc_text = bulletize(desc)
+                    else:
+                        desc_text = desc
+                    ws.cell(row=lower_r, column=excel_col, value=desc_text).alignment = LEFT
 
                 ws.row_dimensions[upper_r].height = 15
                 r += 2
