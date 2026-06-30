@@ -62,7 +62,10 @@ def generate_cba_from_uploaded_template(
         "market familiarity",
     }
 
-    NO_BULLET_ROWS = {"feasibility"}
+    BULLET_ROWS = {
+    "advantages",
+    "disadvantages"
+}
 
     def bulletize(text):
         if text is None:
