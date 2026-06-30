@@ -236,11 +236,12 @@ def generate_cba_from_uploaded_template(
                     rw, desc = split_rating_and_desc(raw)
                     base_text = str(raw or "")
 
-                    if label.strip().lower() in NO_BULLET_ROWS:
-                        txt, align = base_text, LEFT
+                    if label.strip().lower() in BULLET_ROWS:
+                        txt = bulletize(desc or base_text)
                     else:
-                        txt = rw if (desc == "" and rw) else bulletize(desc or base_text)
-                        align = CENTER if (desc == "" and rw) else LEFT
+                        txt = desc or base_text
+                    
+                    align = CENTER if (desc == "" and rw) else LEFT
 
                     ws.cell(row=r, column=excel_col, value=txt).alignment = align
                 r += 1
